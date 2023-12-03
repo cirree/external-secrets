@@ -23,6 +23,8 @@ type GCPSMAuth struct {
 	SecretRef *GCPSMAuthSecretRef `json:"secretRef,omitempty"`
 	// +optional
 	WorkloadIdentity *GCPWorkloadIdentity `json:"workloadIdentity,omitempty"`
+	// +optional
+	WorkloadIdentityFederation *GCPWorkloadIdentityFederation `json:"workloadIdentityFederation,omitempty"`
 }
 
 type GCPSMAuthSecretRef struct {
@@ -36,6 +38,16 @@ type GCPWorkloadIdentity struct {
 	ClusterLocation   string                        `json:"clusterLocation"`
 	ClusterName       string                        `json:"clusterName"`
 	ClusterProjectID  string                        `json:"clusterProjectID,omitempty"`
+}
+
+type GCPWorkloadIdentityFederation struct {
+	ServiceAccountRef        esmeta.ServiceAccountSelector `json:"serviceAccountRef"`
+        // Numeric Google Cloud project ID containing Workload Identity Federation pool/provider
+	ProviderProjectIDNumeric string                        `json:"providerProjectIDNumeric"`
+        // GCP Workload Identity Federation pool ID (example: "my-pool")
+	PoolID                   string                        `json:"poolID"`
+        // GCP Workload Identity Federation provider ID (example: "my-provider")
+	ProviderID               string                        `json:"providerID"`
 }
 
 // GCPSMProvider Configures a store to sync secrets using the GCP Secret Manager provider.

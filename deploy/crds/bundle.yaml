@@ -2465,6 +2465,40 @@ spec:
                                 - clusterName
                                 - serviceAccountRef
                               type: object
+                            workloadIdentityFederation:
+                              properties:
+                                poolID:
+                                  description: 'GCP Workload Identity Federation pool ID (example: "my-pool")'
+                                  type: string
+                                providerID:
+                                  description: 'GCP Workload Identity Federation provider ID (example: "my-provider")'
+                                  type: string
+                                providerProjectIDNumeric:
+                                  description: Numeric Google Cloud project ID containing Workload Identity Federation pool/provider
+                                  type: string
+                                serviceAccountRef:
+                                  description: A reference to a ServiceAccount resource.
+                                  properties:
+                                    audiences:
+                                      description: Audience specifies the `aud` claim for the service account token If the service account uses a well-known annotation for e.g. IRSA or GCP Workload Identity then this audiences will be appended to the list
+                                      items:
+                                        type: string
+                                      type: array
+                                    name:
+                                      description: The name of the ServiceAccount resource being referred to.
+                                      type: string
+                                    namespace:
+                                      description: Namespace of the resource being referred to. Ignored if referent is not cluster-scoped. cluster-scoped defaults to the namespace of the referent.
+                                      type: string
+                                  required:
+                                    - name
+                                  type: object
+                              required:
+                                - poolID
+                                - providerID
+                                - providerProjectIDNumeric
+                                - serviceAccountRef
+                              type: object
                           type: object
                         projectID:
                           description: ProjectID project where secret is located
@@ -6531,6 +6565,40 @@ spec:
                               required:
                                 - clusterLocation
                                 - clusterName
+                                - serviceAccountRef
+                              type: object
+                            workloadIdentityFederation:
+                              properties:
+                                poolID:
+                                  description: 'GCP Workload Identity Federation pool ID (example: "my-pool")'
+                                  type: string
+                                providerID:
+                                  description: 'GCP Workload Identity Federation provider ID (example: "my-provider")'
+                                  type: string
+                                providerProjectIDNumeric:
+                                  description: Numeric Google Cloud project ID containing Workload Identity Federation pool/provider
+                                  type: string
+                                serviceAccountRef:
+                                  description: A reference to a ServiceAccount resource.
+                                  properties:
+                                    audiences:
+                                      description: Audience specifies the `aud` claim for the service account token If the service account uses a well-known annotation for e.g. IRSA or GCP Workload Identity then this audiences will be appended to the list
+                                      items:
+                                        type: string
+                                      type: array
+                                    name:
+                                      description: The name of the ServiceAccount resource being referred to.
+                                      type: string
+                                    namespace:
+                                      description: Namespace of the resource being referred to. Ignored if referent is not cluster-scoped. cluster-scoped defaults to the namespace of the referent.
+                                      type: string
+                                  required:
+                                    - name
+                                  type: object
+                              required:
+                                - poolID
+                                - providerID
+                                - providerProjectIDNumeric
                                 - serviceAccountRef
                               type: object
                           type: object

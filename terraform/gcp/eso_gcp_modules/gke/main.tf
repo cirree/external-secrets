@@ -78,3 +78,59 @@ resource "kubernetes_service_account" "test" {
     }
   }
 }
+
+# Retrieve cluster's OIDC configuration for Workload identity federation testing. This data is necessary to generate 
+data "http" "oidc_config" {
+  url = "https://container.googleapis.com/v1/projects/${var.project_id}/locations/${google_container_cluster.primary.location}/clusters/${google_container_cluster.primary.name}/jwks"
+
+  # Optional request headers
+  request_headers = {
+    Accept = "application/json"
+  }
+}
+
+resource "google_iam_workload_identity_pool" "pool" {
+  project                   = var.project_id
+  workload_identity_pool_id = "external-secret-e2e-managed"
+  display_name              = "external-secret-e2e-managed"
+  description               = "Identity pool for automated test"
+  disabled                  = false
+}
+
+resource "google_iam_workload_identity_pool_provider" "provider-default-audience" {
+  project                            = var.project_id
+  workload_identity_pool_id          = google_iam_workload_identity_pool.pool.workload_identity_pool_id
+  workload_identity_pool_provider_id = "provider-default-audience"
+  attribute_mapping = {
+    "google.subject" = "assertion.sub"
+  }
+  oidc {
+    issuer_uri = "https://container.googleapis.com/v1/projects/${var.project_id}/locations/${google_container_cluster.primary.location}/clusters/${google_container_cluster.primary.name}/jwks"
+  }
+}
+
+resource "google_iam_workload_identity_pool_provider" "provider-custom-audience" {
+  project                            = var.project_id
+  workload_identity_pool_id          = google_iam_workload_identity_pool.pool.workload_identity_pool_id
+  workload_identity_pool_provider_id = "provider-custom-audience"
+  attribute_mapping = {
+    "google.subject" = "assertion.sub"
+  }
+  oidc {
+    allowed_audiences = ["external-secrets.io/custom-audience-test"]
+    issuer_uri        = "https://container.googleapis.com/v1/projects/${var.project_id}/locations/${google_container_cluster.primary.location}/clusters/${google_container_cluster.primary.name}/jwks"
+  }
+}
+
+resource "google_iam_workload_identity_pool_provider" "provider-jwk-file" {
+  project                            = var.project_id
+  workload_identity_pool_id          = google_iam_workload_identity_pool.pool.workload_identity_pool_id
+  workload_identity_pool_provider_id = "provider-jwk-file"
+  attribute_mapping = {
+    "google.subject" = "assertion.sub"
+  }
+  oidc {
+    jwks_json  = data.http.oidc_config.response_body
+    issuer_uri = "https://kubernetes.svc.local"
+  }
+}

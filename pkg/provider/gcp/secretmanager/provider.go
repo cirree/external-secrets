@@ -135,6 +135,11 @@ func (p *Provider) ValidateStore(store esv1beta1.GenericStore) (admission.Warnin
 			return nil, fmt.Errorf(errInvalidWISARef, err)
 		}
 	}
+	if g.Auth.WorkloadIdentityFederation != nil {
+		if err := utils.ValidateReferentServiceAccountSelector(store, g.Auth.WorkloadIdentity.ServiceAccountRef); err != nil {
+			return nil, fmt.Errorf(errInvalidWISARef, err)
+		}
+	}
 	return nil, nil
 }
 

@@ -30,15 +30,29 @@ func NewTokenSource(ctx context.Context, auth esv1beta1.GCPSMAuth, projectID, st
 	if ts != nil || err != nil {
 		return ts, err
 	}
-	wi, err := newWorkloadIdentity(ctx, projectID)
-	if err != nil {
-		return nil, fmt.Errorf("unable to initialize workload identity")
+	if auth.WorkloadIdentity != nil {
+		wi, err := newWorkloadIdentity(ctx, projectID)
+		if err != nil {
+			return nil, fmt.Errorf("unable to initialize workload identity")
+		}
+		defer wi.Close()
+		isClusterKind := storeKind == esv1beta1.ClusterSecretStoreKind
+		ts, err = wi.TokenSource(ctx, auth, isClusterKind, kube, namespace)
+		if ts != nil || err != nil {
+			return ts, err
+		}
 	}
-	defer wi.Close()
-	isClusterKind := storeKind == esv1beta1.ClusterSecretStoreKind
-	ts, err = wi.TokenSource(ctx, auth, isClusterKind, kube, namespace)
-	if ts != nil || err != nil {
-		return ts, err
+	if auth.WorkloadIdentityFederation != nil {
+		wif, err := newWorkloadIdentityFederation(ctx, projectID)
+		if err != nil {
+			return nil, fmt.Errorf("unable to initialize workload identity federation")
+		}
+		defer wif.Close()
+		isClusterKind := storeKind == esv1beta1.ClusterSecretStoreKind
+		ts, err = wif.TokenSource(ctx, auth, isClusterKind, kube, namespace)
+		if ts != nil || err != nil {
+			return ts, err
+		}
 	}
 	return google.DefaultTokenSource(ctx, CloudPlatformRole)
 }
